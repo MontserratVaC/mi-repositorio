@@ -1,122 +1,68 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Extras.css';
 
 function Extras() {
-  const [totalSelectedGrams, setTotalSelectedGrams] = useState(0);
   const [extras, setExtras] = useState([]);
+  const [quantities, setQuantities] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedProducts, selectedLiquors, selectedRefreshments, selectedFruits, totalAmount } = location.state || { selectedProducts: [], selectedLiquors: [], selectedRefreshments: [], selectedFruits: [], totalAmount: 0 };
 
   useEffect(() => {
-    const fetchExtras = async () => {
-      try {
-        const response = await axios.get('http://localhost/extras_read.php');
+    axios.get('http://localhost/extras_read.php')
+      .then(response => {
         setExtras(response.data);
-      } catch (error) {
-        console.error('Error fetching extras:', error);
-      }
-    };
-
-    fetchExtras();
-  }, []);
-
-  useEffect(() => {
-    if (extras.length > 0) {
-      var swiper = new Swiper(".mySwiper", {
-        effect: "coverflow",
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: "auto",
-        loop: true,
-        coverflowEffect: {
-          depth: 500,
-          modifier: 1,
-          slideShadows: true,
-          rotate: 0,
-          stretch: 0
-        }
+        const initialQuantities = {};
+        response.data.forEach(extra => {
+          initialQuantities[extra.id] = 0;
+        });
+        setQuantities(initialQuantities);
+      })
+      .catch(error => {
+        console.error('Error al obtener extras:', error);
       });
 
-      var totalGrams = 50;
-      var gramCounts = {};
+    var swiper = new Swiper(".mySwiper", {
+      effect: "coverflow",
+      grabCursor: true,
+      centeredSlides: true,
+      slidesPerView: "auto",
+      loop: true,
+      coverflowEffect: {
+        depth: 500,
+        modifier: 1,
+        slideShadows: true,
+        rotate: 0,
+        stretch: 0
+      }
+    });
+  }, []);
 
-      const handlePlusClick = (extraName, gramCounter, statusMsg) => {
-        if (gramCounts[extraName] < 50 && sumGramCounts() < totalGrams) {
-          gramCounts[extraName] += 10;
-          gramCounter.textContent = gramCounts[extraName] + ' gramos';
-          updateStatusMsg(extraName, statusMsg);
-          setTotalSelectedGrams(sumGramCounts());
-        } else {
-          statusMsg.textContent = 'No puedes seleccionar más de 50 gramos en total.';
-        }
-      };
+  const handleQuantityChange = (id, change) => {
+    setQuantities(prevQuantities => ({
+      ...prevQuantities,
+      [id]: Math.max(0, (prevQuantities[id] || 0) + change)
+    }));
+  };
 
-      const handleMinusClick = (extraName, gramCounter, statusMsg) => {
-        if (gramCounts[extraName] > 0) {
-          gramCounts[extraName] -= 10;
-          gramCounter.textContent = gramCounts[extraName] + ' gramos';
-          updateStatusMsg(extraName, statusMsg);
-          setTotalSelectedGrams(sumGramCounts());
-        } else {
-          statusMsg.textContent = 'No puedes tener menos de 0 gramos.';
-        }
-      };
+  const handleNextClick = () => {
+    const selectedExtras = extras.filter(extra => quantities[extra.id] > 0).map(extra => ({
+      ...extra,
+      quantity: quantities[extra.id],
+      totalPrice: (quantities[extra.id] / 10) * extra.precio
+    }));
+    const totalExtrasAmount = selectedExtras.reduce((total, extra) => total + extra.totalPrice, 0);
+    const newTotalAmount = totalAmount + totalExtrasAmount;
 
-      const updateStatusMsg = (extraName, statusMsg) => {
-        var totalGramsSelected = sumGramCounts();
-        var gramCount = gramCounts[extraName];
-        if (gramCount < 50) {
-          statusMsg.textContent = 'Ya elegiste ' + gramCount + ' gramos. Te faltan ' + (50 - totalGramsSelected) + ' gramos.';
-        } else {
-          statusMsg.textContent = 'Ya has alcanzado el límite de 50 gramos para ' + extraName + '.';
-        }
-      };
-
-      const sumGramCounts = () => {
-        var sum = 0;
-        Object.values(gramCounts).forEach(function (count) {
-          sum += count;
-        });
-        return sum;
-      };
-
-      const initializeSlides = () => {
-        var slides = document.querySelectorAll('.swiper-slide');
-        slides.forEach(function (slide) {
-          var plusBtn = slide.querySelector('.plus-btn');
-          var minusBtn = slide.querySelector('.minus-btn');
-          var gramCounter = slide.querySelector('.gram-counter');
-          var statusMsg = slide.querySelector('.status-msg');
-          var extraName = slide.querySelector('h3').textContent.trim();
-
-          gramCounts[extraName] = 0;
-
-          plusBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            handlePlusClick(extraName, gramCounter, statusMsg);
-          });
-
-          minusBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            handleMinusClick(extraName, gramCounter, statusMsg);
-          });
-        });
-      };
-
-      initializeSlides();
-    }
-  }, [extras]);
-
-  const handleSiguienteClick = (e) => {
-    e.preventDefault();
-    navigate('/Pago');
+    navigate('/Pago', { state: { selectedProducts, selectedLiquors, selectedRefreshments, selectedFruits, selectedExtras, totalAmount: newTotalAmount } });
   };
 
   return (
     <div className="catalog-container">
       <h1>Personaliza tus extras</h1>
-      <h2>Elige mínimo 50 gramos.</h2>
+      <h2>Elige mínimo 40 gramos.</h2>
       <div className="swiper mySwiper">
         <div className="swiper-wrapper">
           {extras.map((extra) => (
@@ -135,18 +81,18 @@ function Extras() {
                 </div>
               </div>
               <div className="control-panel">
-                <a href="#" className="btn-1 minus-btn">-</a>
-                <span className="gram-counter">0 gramos</span>
-                <a href="#" className="btn-1 plus-btn">+</a>
+                <a href="#" className="btn-1 minus-btn" onClick={(e) => { e.preventDefault(); handleQuantityChange(extra.id, -10); }}>-</a>
+                <span className="quantity-counter">{quantities[extra.id]} gramos</span>
+                <a href="#" className="btn-1 plus-btn" onClick={(e) => { e.preventDefault(); handleQuantityChange(extra.id, 10); }}>+</a>
               </div>
-              <p className="status-msg"></p>
+              <p className="status-msg">{quantities[extra.id] > 0 ? `Ya elegiste ${quantities[extra.id]} gramos.` : 'Selecciona la cantidad.'}</p>
             </div>
           ))}
         </div>
       </div>
-      {totalSelectedGrams === 50 && (
+      {Object.values(quantities).reduce((total, qty) => total + qty, 0) >= 10 && (
         <div className="btn-container">
-          <a href="#" className="btn-1 siguiente-btn" onClick={handleSiguienteClick}>Pagar</a>
+          <button className="btn-1" onClick={handleNextClick}>Siguiente</button>
         </div>
       )}
     </div>

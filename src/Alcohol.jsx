@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Alcohol.css';
@@ -7,6 +7,7 @@ function Alcohol() {
   const [totalSelectedOz, setTotalSelectedOz] = useState(0);
   const [liquors, setLiquors] = useState([]);
   const navigate = useNavigate();
+  const ozCountsRef = useRef({}); 
 
   useEffect(() => {
     const fetchLiquors = async () => {
@@ -38,13 +39,12 @@ function Alcohol() {
         }
       });
 
-      var totalOz = 6; 
-      var ozCounts = {};
+      const totalOz = 6;
 
       const handlePlusClick = (liquorName, ozCounter, statusMsg) => {
-        if (ozCounts[liquorName] < totalOz && sumOzCounts() < totalOz) {
-          ozCounts[liquorName]++;
-          ozCounter.textContent = ozCounts[liquorName] + ' oz';
+        if (ozCountsRef.current[liquorName] < totalOz && sumOzCounts() < totalOz) {
+          ozCountsRef.current[liquorName] = (ozCountsRef.current[liquorName] || 0) + 1;
+          ozCounter.textContent = ozCountsRef.current[liquorName] + ' oz';
           updateStatusMsg(liquorName, statusMsg);
           setTotalSelectedOz(sumOzCounts());
         } else {
@@ -53,9 +53,9 @@ function Alcohol() {
       };
 
       const handleMinusClick = (liquorName, ozCounter, statusMsg) => {
-        if (ozCounts[liquorName] > 0) {
-          ozCounts[liquorName]--;
-          ozCounter.textContent = ozCounts[liquorName] + ' oz';
+        if (ozCountsRef.current[liquorName] > 0) {
+          ozCountsRef.current[liquorName]--;
+          ozCounter.textContent = ozCountsRef.current[liquorName] + ' oz';
           updateStatusMsg(liquorName, statusMsg);
           setTotalSelectedOz(sumOzCounts());
         } else {
@@ -64,8 +64,8 @@ function Alcohol() {
       };
 
       const updateStatusMsg = (liquorName, statusMsg) => {
-        var totalOzSelected = sumOzCounts();
-        var ozCount = ozCounts[liquorName];
+        const totalOzSelected = sumOzCounts();
+        const ozCount = ozCountsRef.current[liquorName];
         if (ozCount < totalOz) {
           statusMsg.textContent = 'Ya elegiste ' + ozCount + ' oz. Te faltan ' + (totalOz - totalOzSelected) + ' oz.';
         } else {
@@ -74,30 +74,30 @@ function Alcohol() {
       };
 
       const sumOzCounts = () => {
-        var sum = 0;
-        Object.values(ozCounts).forEach(function (count) {
+        let sum = 0;
+        Object.values(ozCountsRef.current).forEach((count) => {
           sum += count;
         });
         return sum;
       };
 
       const initializeSlides = () => {
-        var slides = document.querySelectorAll('.swiper-slide');
-        slides.forEach(function (slide) {
-          var plusBtn = slide.querySelector('.plus-btn');
-          var minusBtn = slide.querySelector('.minus-btn');
-          var ozCounter = slide.querySelector('.oz-counter');
-          var statusMsg = slide.querySelector('.status-msg');
-          var liquorName = slide.querySelector('h3').textContent.trim();
+        const slides = document.querySelectorAll('.swiper-slide');
+        slides.forEach((slide) => {
+          const plusBtn = slide.querySelector('.plus-btn');
+          const minusBtn = slide.querySelector('.minus-btn');
+          const ozCounter = slide.querySelector('.oz-counter');
+          const statusMsg = slide.querySelector('.status-msg');
+          const liquorName = slide.querySelector('h3').textContent.trim();
 
-          ozCounts[liquorName] = 0;
+          ozCountsRef.current[liquorName] = 0;
 
-          plusBtn.addEventListener('click', function (e) {
+          plusBtn.addEventListener('click', (e) => {
             e.preventDefault();
             handlePlusClick(liquorName, ozCounter, statusMsg);
           });
 
-          minusBtn.addEventListener('click', function (e) {
+          minusBtn.addEventListener('click', (e) => {
             e.preventDefault();
             handleMinusClick(liquorName, ozCounter, statusMsg);
           });
@@ -110,7 +110,16 @@ function Alcohol() {
 
   const handleSiguienteClick = (e) => {
     e.preventDefault();
-    navigate('/Refresco');
+    if (totalSelectedOz === 6) {
+      const selectedLiquors = liquors.filter(liquor => ozCountsRef.current[liquor.nombre] > 0).map(liquor => ({
+        ...liquor,
+        quantity: ozCountsRef.current[liquor.nombre],
+        totalPrice: ozCountsRef.current[liquor.nombre] * liquor.precio
+      }));
+      navigate('/Refresco', { state: { selectedLiquors } });
+    } else {
+      alert('Debes seleccionar exactamente 6 oz.');
+    }
   };
 
   return (
@@ -144,11 +153,9 @@ function Alcohol() {
           ))}
         </div>
       </div>
-      {totalSelectedOz === 6 && (
-        <div className="btn-container">
-          <a href="#" className="btn-1 siguiente-btn" onClick={handleSiguienteClick}>Siguiente</a>
-        </div>
-      )}
+      <div className="btn-container">
+        <a href="#" className="btn-1 siguiente-btn" onClick={handleSiguienteClick}>Siguiente</a>
+      </div>
     </div>
   );
 }

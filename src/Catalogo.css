@@ -1,5 +1,3 @@
-
-
 html, body {
   position: relative;
   height: 100%;
@@ -22,9 +20,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   color: #56070c !important; 
+  margin-bottom: 150px; 
 }
 
-h1 {
+h1, h2 {
   text-align: center;
   font-size: 40px !important;
   color: #56070c !important; 
@@ -44,7 +43,7 @@ h1 {
 
 .swiper-slide {
   width: 300px !important; 
-  height: 450px !important; 
+  height: 500px !important;
   background-color: #ffffff !important; 
   box-shadow: 0 0 20px rgba(235, 183, 183, 0.788) !important;
   padding: 20px !important; 
@@ -55,7 +54,7 @@ h1 {
 
 .icons {
   display: flex !important;
-  justify-content: space-between !important;
+  justify-content: center !important;
   align-items: center !important;
   margin-bottom: 20px !important;
 }
@@ -66,7 +65,7 @@ h1 {
 }
 
 .icons img {
-  width: 120px !important; 
+  width: 80px !important; 
 }
 
 .product-content {
@@ -76,49 +75,79 @@ h1 {
 }
 
 .product-txt {
-  flex-basis: 50% !important;
+  flex-basis: 60% !important; 
   text-align: left !important;
 }
 
 .product-txt span {
-  font-size: 20px !important;
+  font-size: 25px !important;
   color: #56070c !important;
   font-weight: bold !important;
 }
 
 .product-txt h3 {
-  font-size: 18px !important;
+  font-size: 20px !important;
   color: black !important;
   text-transform: uppercase !important;
 }
 
 .product-txt ul {
-  font-size: 12px !important;
+  font-size: 14px !important;
   color: black !important;
-  padding-left: 20px !important; 
+  padding-left: 20px !important;
 }
 
 .product-img {
-  flex-basis: 50% !important; 
+  flex-basis: 40% !important; 
   text-align: right !important;
 }
 
 .product-img img {
-  width: 100px !important; 
+  width: 120px !important; 
+}
+
+.control-panel {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-top: 20px !important;
+  flex-direction: row !important; 
+}
+
+.quantity-counter {
+  margin: 0 10px !important;
+  font-size: 16px !important;
+  color: #56070c !important;
+}
+
+.status-msg {
+  margin-top: 10px !important;
+  font-size: 14px !important;
+  color: #56070c !important;
 }
 
 .btn-1 {
   display: inline-block !important;
-  padding: 10px 40px !important;
+  padding: 13px 30px !important;
   border: 1px solid #56070c !important;
   border-radius: 25px !important;
   color: #56070c !important;
   text-decoration: none !important;
-  margin-top: 20px !important; 
   background-color: #ffffff !important; 
 }
 
 .btn-1:hover {
   background-color: #56070c !important;
   color: #ffffff !important;
+}
+
+.btn-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-top: 20px !important;
+}
+
+.siguiente-btn {
+  margin-top: 20px !important;
 }

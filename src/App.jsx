@@ -13,18 +13,32 @@ import FrutasProfile from './FrutasProfile';
 import ExtrasProfile from './ExtrasProfile';
 import Frutas from './Frutas';
 import Extras from './Extras';
+import Registro from './Registro';
+import PerfilUsuario from './PerfilUsuario';
+import Pago from './Pago';
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      setIsLoggedIn(true);
+      setIsAdmin(user.email === 'administrador@gmail.com');
+    }
+  }, []);
+
   return (
     <Router>
       <div className="app-container">
-        <Menu />
+        <Menu isLoggedIn={isLoggedIn} isAdmin={isAdmin} setIsLoggedIn={setIsLoggedIn} setIsAdmin={setIsAdmin} />
         <main className="content-container">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/Catalogo" element={<Catalogo />} />
             <Route path="/Alcohol" element={<Alcohol />} />
-            <Route path="/Login" element={<Login />} />
+            <Route path="/Login" element={<Login setIsLoggedIn={setIsLoggedIn} setIsAdmin={setIsAdmin} />} />
             <Route path="/admin-profile" element={<AdminProfile />} />
             <Route path="/Refresco" element={<Refresco />} />
             <Route path="/alcohol-profile" element={<AlcoholProfile />} />
@@ -33,6 +47,9 @@ function App() {
             <Route path="/extras-profile" element={<ExtrasProfile />} />
             <Route path="/Frutas" element={<Frutas />} />
             <Route path="/Extras" element={<Extras />} />
+            <Route path="/Registro" element={<Registro />} />
+            <Route path="/PerfilUsuario" element={<PerfilUsuario />} />
+            <Route path="/Pago" element={<Pago />} />
           </Routes>
         </main>
         <footer>
@@ -71,7 +88,7 @@ function Home() {
   );
 }
 
-function Menu() {
+function Menu({ isLoggedIn, isAdmin, setIsLoggedIn, setIsAdmin }) {
   const [showMenu, setShowMenu] = useState(false);
   const location = useLocation();
   const menuRef = useRef(null);
@@ -80,7 +97,12 @@ function Menu() {
     setShowMenu(!showMenu);
   };
 
-  const isAdminPage = location.pathname.includes('profile');
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    window.location.href = '/'; 
+  };
 
   useEffect(() => {
     const handleMouseLeave = () => {
@@ -106,10 +128,12 @@ function Menu() {
           &#9776;
         </button>
         <div className={`dropdown-content ${showMenu ? 'show' : ''}`} ref={menuRef}>
-          <Link to="/Login">Administrador</Link>
-          {isAdminPage && <Link to="/">Cerrar Sesión</Link>}
-          {!isAdminPage && <Link to="/">Ir a inicio</Link>}
-          {isAdminPage && (
+          {!isLoggedIn && <Link to="/Login">Iniciar Sesión</Link>}
+          {!isLoggedIn && <Link to="/Registro">Regístrate</Link>}
+          <Link to="/">Ir a inicio</Link>
+          {isLoggedIn && <Link to="/PerfilUsuario">Perfil</Link>}
+          {isLoggedIn && <a href="#" onClick={handleLogout}>Cerrar Sesión</a>}
+          {isAdmin && (
             <>
               <Link to="/alcohol-profile">Alcohol</Link>
               <Link to="/refresco-profile">Refresco</Link>

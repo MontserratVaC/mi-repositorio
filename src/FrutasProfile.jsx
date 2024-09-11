@@ -125,7 +125,7 @@ const FrutasProfile = () => {
     axios.post('http://localhost/generar_pdf_frutas.php', { data: dataState }, { responseType: 'blob' })
       .then(response => {
         const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-        window.open(url, '_blank'); // Abrir el PDF en una nueva pestaña
+        window.open(url, '_blank'); 
       })
       .catch(error => console.error('Error al generar el PDF:', error));
   };

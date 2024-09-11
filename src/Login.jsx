@@ -1,65 +1,68 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './Login.css';
-import logo from './img/logo2.png'; 
 
-function Login() {
+const Login = ({ setIsLoggedIn, setIsAdmin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Valida las credenciales con el servidor
-    const response = await fetch('http://localhost/login.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-    console.log(data); // Mensaje de depuración
-
-    if (data.success) {
-      // Te envia al perfil del administrador si las credenciales son correctas
-      navigate('/admin-profile');  
-    } else {
-      alert(data.message || 'Credenciales incorrectas. Por favor, intenta de nuevo.');
+    try {
+      const response = await axios.post('http://localhost/login.php', { email, password });
+      if (response.data.success) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        setIsLoggedIn(true);
+        setIsAdmin(response.data.user.email === 'administrador@gmail.com');
+        if (response.data.user.email === 'administrador@gmail.com') {
+          navigate('/admin-profile');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError('Credenciales incorrectas');
+      }
+    } catch (error) {
+      setError('Error al iniciar sesión');
     }
   };
 
   return (
     <div className="login-container">
-      <img src={logo} alt="Logo" className="login-logo" />
-      <h1 className="login-heading">Inicio de Sesión</h1>
+      <img src="src/img/logo2.png" alt="Logo" className="login-logo" />
+      <h2 className="login-heading">Iniciar Sesión</h2>
       <form onSubmit={handleSubmit} className="login-form">
-        <label className="login-label">
-          Correo:
+        <div className="login-field">
+          <label className="login-label">Email:</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="login-input"
             required
+            className="login-input"
           />
-        </label>
-        <label className="login-label">
-          Contraseña:
+        </div>
+        <div className="login-field">
+          <label className="login-label">Password:</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="login-input"
             required
+            className="login-input"
           />
-        </label>
+        </div>
+        {error && <p className="error">{error}</p>}
         <button type="submit" className="login-button">Iniciar Sesión</button>
       </form>
+      <p>
+        ¿No tienes una cuenta? <a href="/Registro">Regístrate aquí</a>
+      </p>
     </div>
   );
-}
+};
 
 export default Login;

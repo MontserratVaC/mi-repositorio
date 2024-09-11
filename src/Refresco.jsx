@@ -1,116 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Refresco.css';
 
 function Refresco() {
-  const [totalSelectedGrams, setTotalSelectedGrams] = useState(0);
   const [refreshments, setRefreshments] = useState([]);
+  const [quantities, setQuantities] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedProducts, selectedLiquors, totalAmount } = location.state || { selectedProducts: [], selectedLiquors: [], totalAmount: 0 };
 
   useEffect(() => {
-    const fetchRefreshments = async () => {
-      try {
-        const response = await axios.get('http://localhost/refresco_read.php');
+    axios.get('http://localhost/refresco_read.php')
+      .then(response => {
         setRefreshments(response.data);
-      } catch (error) {
+        const initialQuantities = {};
+        response.data.forEach(refreshment => {
+          initialQuantities[refreshment.id] = 0;
+        });
+        setQuantities(initialQuantities);
+      })
+      .catch(error => {
         console.error('Error fetching refreshments:', error);
-      }
-    };
-
-    fetchRefreshments();
-  }, []);
-
-  useEffect(() => {
-    if (refreshments.length > 0) {
-      var swiper = new Swiper(".mySwiper", {
-        effect: "coverflow",
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: "auto",
-        loop: true,
-        coverflowEffect: {
-          depth: 500,
-          modifier: 1,
-          slideShadows: true,
-          rotate: 0,
-          stretch: 0
-        }
       });
 
-      var totalGrams = 700; // Ajuste para 700 gramos en total
-      var gramCounts = {};
+    var swiper = new Swiper(".mySwiper", {
+      effect: "coverflow",
+      grabCursor: true,
+      centeredSlides: true,
+      slidesPerView: "auto",
+      loop: true,
+      coverflowEffect: {
+        depth: 500,
+        modifier: 1,
+        slideShadows: true,
+        rotate: 0,
+        stretch: 0
+      }
+    });
+  }, []);
 
-      const handlePlusClick = (refreshmentName, gramCounter, statusMsg) => {
-        if (gramCounts[refreshmentName] < totalGrams && sumGramCounts() < totalGrams) {
-          gramCounts[refreshmentName] += 100;
-          gramCounter.textContent = gramCounts[refreshmentName] + ' gramos';
-          updateStatusMsg(refreshmentName, statusMsg);
-          setTotalSelectedGrams(sumGramCounts());
-        } else {
-          statusMsg.textContent = 'No puedes seleccionar más de 700 gramos en total.';
-        }
-      };
+  const handleQuantityChange = (id, change) => {
+    setQuantities(prevQuantities => ({
+      ...prevQuantities,
+      [id]: Math.max(0, (prevQuantities[id] || 0) + change)
+    }));
+  };
 
-      const handleMinusClick = (refreshmentName, gramCounter, statusMsg) => {
-        if (gramCounts[refreshmentName] > 0) {
-          gramCounts[refreshmentName] -= 100;
-          gramCounter.textContent = gramCounts[refreshmentName] + ' gramos';
-          updateStatusMsg(refreshmentName, statusMsg);
-          setTotalSelectedGrams(sumGramCounts());
-        } else {
-          statusMsg.textContent = 'No puedes tener menos de 0 gramos.';
-        }
-      };
+  const handleNextClick = () => {
+    const selectedRefreshments = refreshments.filter(refreshment => quantities[refreshment.id] > 0).map(refreshment => ({
+      ...refreshment,
+      quantity: quantities[refreshment.id],
+      totalPrice: (quantities[refreshment.id] / 100) * refreshment.precio
+    }));
+    const totalRefreshmentsAmount = selectedRefreshments.reduce((total, refreshment) => total + refreshment.totalPrice, 0);
+    const newTotalAmount = totalAmount + totalRefreshmentsAmount;
 
-      const updateStatusMsg = (refreshmentName, statusMsg) => {
-        var totalGramsSelected = sumGramCounts();
-        var gramCount = gramCounts[refreshmentName];
-        if (gramCount < totalGrams) {
-          statusMsg.textContent = 'Ya elegiste ' + gramCount + ' gramos. Te faltan ' + (totalGrams - totalGramsSelected) + ' gramos.';
-        } else {
-          statusMsg.textContent = 'Ya has alcanzado el límite de 700 gramos para ' + refreshmentName + '.';
-        }
-      };
-
-      const sumGramCounts = () => {
-        var sum = 0;
-        Object.values(gramCounts).forEach(function (count) {
-          sum += count;
-        });
-        return sum;
-      };
-
-      const initializeSlides = () => {
-        var slides = document.querySelectorAll('.swiper-slide');
-        slides.forEach(function (slide) {
-          var plusBtn = slide.querySelector('.plus-btn');
-          var minusBtn = slide.querySelector('.minus-btn');
-          var gramCounter = slide.querySelector('.oz-counter');
-          var statusMsg = slide.querySelector('.status-msg');
-          var refreshmentName = slide.querySelector('h3').textContent.trim();
-
-          gramCounts[refreshmentName] = 0;
-
-          plusBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            handlePlusClick(refreshmentName, gramCounter, statusMsg);
-          });
-
-          minusBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            handleMinusClick(refreshmentName, gramCounter, statusMsg);
-          });
-        });
-      };
-
-      initializeSlides();
-    }
-  }, [refreshments]);
-
-  const handlePagarClick = (e) => {
-    e.preventDefault();
-    navigate('/Frutas');
+    navigate('/Frutas', { state: { selectedProducts, selectedLiquors, selectedRefreshments, totalAmount: newTotalAmount } });
   };
 
   return (
@@ -135,18 +81,18 @@ function Refresco() {
                 </div>
               </div>
               <div className="control-panel">
-                <a href="#" className="btn-1 minus-btn">-</a>
-                <span className="oz-counter">0 gramos</span>
-                <a href="#" className="btn-1 plus-btn">+</a>
+                <a href="#" className="btn-1 minus-btn" onClick={(e) => { e.preventDefault(); handleQuantityChange(refreshment.id, -100); }}>-</a>
+                <span className="quantity-counter">{quantities[refreshment.id]} gramos</span>
+                <a href="#" className="btn-1 plus-btn" onClick={(e) => { e.preventDefault(); handleQuantityChange(refreshment.id, 100); }}>+</a>
               </div>
-              <p className="status-msg"></p>
+              <p className="status-msg">{quantities[refreshment.id] > 0 ? `Ya elegiste ${quantities[refreshment.id]} gramos.` : 'Selecciona la cantidad.'}</p>
             </div>
           ))}
         </div>
       </div>
-      {totalSelectedGrams === 700 && (
+      {Object.values(quantities).reduce((total, qty) => total + qty, 0) >= 700 && (
         <div className="btn-container">
-          <a href="#" className="btn-1 siguiente-btn" onClick={handlePagarClick}>Siguiente</a>
+          <button className="btn-1" onClick={handleNextClick}>Siguiente</button>
         </div>
       )}
     </div>

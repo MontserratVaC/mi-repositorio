@@ -1,121 +1,67 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Frutas.css';
 
 function Frutas() {
-  const [totalSelectedGrams, setTotalSelectedGrams] = useState(0);
   const [fruits, setFruits] = useState([]);
+  const [quantities, setQuantities] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedProducts, selectedLiquors, selectedRefreshments, totalAmount } = location.state || { selectedProducts: [], selectedLiquors: [], selectedRefreshments: [], totalAmount: 0 };
 
   useEffect(() => {
-    const fetchFruits = async () => {
-      try {
-        const response = await axios.get('http://localhost/frutas_read.php');
+    axios.get('http://localhost/frutas_read.php')
+      .then(response => {
         setFruits(response.data);
-      } catch (error) {
+        const initialQuantities = {};
+        response.data.forEach(fruit => {
+          initialQuantities[fruit.id] = 0;
+        });
+        setQuantities(initialQuantities);
+      })
+      .catch(error => {
         console.error('Error fetching fruits:', error);
-      }
-    };
-
-    fetchFruits();
-  }, []);
-
-  useEffect(() => {
-    if (fruits.length > 0) {
-      var swiper = new Swiper(".mySwiper", {
-        effect: "coverflow",
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: "auto",
-        loop: true,
-        coverflowEffect: {
-          depth: 500,
-          modifier: 1,
-          slideShadows: true,
-          rotate: 0,
-          stretch: 0
-        }
       });
 
-      var totalGrams = 50;
-      var gramCounts = {};
+    var swiper = new Swiper(".mySwiper", {
+      effect: "coverflow",
+      grabCursor: true,
+      centeredSlides: true,
+      slidesPerView: "auto",
+      loop: true,
+      coverflowEffect: {
+        depth: 500,
+        modifier: 1,
+        slideShadows: true,
+        rotate: 0,
+        stretch: 0
+      }
+    });
+  }, []);
 
-      const handlePlusClick = (fruitName, gramCounter, statusMsg) => {
-        if (gramCounts[fruitName] < 50 && sumGramCounts() < totalGrams) {
-          gramCounts[fruitName] += 10;
-          gramCounter.textContent = gramCounts[fruitName] + ' gramos';
-          updateStatusMsg(fruitName, statusMsg);
-          setTotalSelectedGrams(sumGramCounts());
-        } else {
-          statusMsg.textContent = 'No puedes seleccionar más de 50 gramos en total.';
-        }
-      };
+  const handleQuantityChange = (id, change) => {
+    setQuantities(prevQuantities => ({
+      ...prevQuantities,
+      [id]: Math.max(0, (prevQuantities[id] || 0) + change)
+    }));
+  };
 
-      const handleMinusClick = (fruitName, gramCounter, statusMsg) => {
-        if (gramCounts[fruitName] > 0) {
-          gramCounts[fruitName] -= 10;
-          gramCounter.textContent = gramCounts[fruitName] + ' gramos';
-          updateStatusMsg(fruitName, statusMsg);
-          setTotalSelectedGrams(sumGramCounts());
-        } else {
-          statusMsg.textContent = 'No puedes tener menos de 0 gramos.';
-        }
-      };
+  const handleNextClick = () => {
+    const selectedFruits = fruits.filter(fruit => quantities[fruit.id] > 0).map(fruit => ({
+      ...fruit,
+      quantity: quantities[fruit.id],
+      totalPrice: (quantities[fruit.id] / 10) * fruit.precio
+    }));
+    const totalFruitsAmount = selectedFruits.reduce((total, fruit) => total + fruit.totalPrice, 0);
+    const newTotalAmount = totalAmount + totalFruitsAmount;
 
-      const updateStatusMsg = (fruitName, statusMsg) => {
-        var totalGramsSelected = sumGramCounts();
-        var gramCount = gramCounts[fruitName];
-        if (gramCount < 50) {
-          statusMsg.textContent = 'Ya elegiste ' + gramCount + ' gramos. Te faltan ' + (50 - totalGramsSelected) + ' gramos.';
-        } else {
-          statusMsg.textContent = 'Ya has alcanzado el límite de 50 gramos para ' + fruitName + '.';
-        }
-      };
-
-      const sumGramCounts = () => {
-        var sum = 0;
-        Object.values(gramCounts).forEach(function (count) {
-          sum += count;
-        });
-        return sum;
-      };
-
-      const initializeSlides = () => {
-        var slides = document.querySelectorAll('.swiper-slide');
-        slides.forEach(function (slide) {
-          var plusBtn = slide.querySelector('.plus-btn');
-          var minusBtn = slide.querySelector('.minus-btn');
-          var gramCounter = slide.querySelector('.gram-counter');
-          var statusMsg = slide.querySelector('.status-msg');
-          var fruitName = slide.querySelector('h3').textContent.trim();
-
-          gramCounts[fruitName] = 0;
-
-          plusBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            handlePlusClick(fruitName, gramCounter, statusMsg);
-          });
-
-          minusBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            handleMinusClick(fruitName, gramCounter, statusMsg);
-          });
-        });
-      };
-
-      initializeSlides();
-    }
-  }, [fruits]);
-
-  const handleSiguienteClick = (e) => {
-    e.preventDefault();
-    navigate('/Extras');
+    navigate('/Extras', { state: { selectedProducts, selectedLiquors, selectedRefreshments, selectedFruits, totalAmount: newTotalAmount } });
   };
 
   return (
     <div className="catalog-container">
-      <h1>Personaliza tú fruta</h1>
+      <h1>Personaliza tu fruta</h1>
       <h2>Elige mínimo 50 gramos.</h2>
       <div className="swiper mySwiper">
         <div className="swiper-wrapper">
@@ -135,18 +81,18 @@ function Frutas() {
                 </div>
               </div>
               <div className="control-panel">
-                <a href="#" className="btn-1 minus-btn">-</a>
-                <span className="gram-counter">0 gramos</span>
-                <a href="#" className="btn-1 plus-btn">+</a>
+                <a href="#" className="btn-1 minus-btn" onClick={(e) => { e.preventDefault(); handleQuantityChange(fruit.id, -10); }}>-</a>
+                <span className="quantity-counter">{quantities[fruit.id]} gramos</span>
+                <a href="#" className="btn-1 plus-btn" onClick={(e) => { e.preventDefault(); handleQuantityChange(fruit.id, 10); }}>+</a>
               </div>
-              <p className="status-msg"></p>
+              <p className="status-msg">{quantities[fruit.id] > 0 ? `Ya elegiste ${quantities[fruit.id]} gramos.` : 'Selecciona la cantidad.'}</p>
             </div>
           ))}
         </div>
       </div>
-      {totalSelectedGrams === 50 && (
+      {Object.values(quantities).reduce((total, qty) => total + qty, 0) >= 50 && (
         <div className="btn-container">
-          <a href="#" className="btn-1 siguiente-btn" onClick={handleSiguienteClick}>Siguiente</a>
+          <button className="btn-1" onClick={handleNextClick}>Siguiente</button>
         </div>
       )}
     </div>
