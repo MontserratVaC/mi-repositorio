@@ -44,7 +44,7 @@ function Pago() {
   useEffect(() => {
     // Script de PayPal
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=AcKp0WMNoFxG2YdrbCmmYJPdc7_EZzgmON74FZXGpdxneI7U1JvHfFRifS8lsIvWj3_JekMus5jndS-9&currency=USD`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=AcKp0WMNoFxG2YdrbCmmYJPdc7_EZzgmON74FZXGpdxneI7U1JvHfFRifS8lsIvWj3_JekMus5jndS-9&currency=MXN`;
     script.async = true;
 
     script.onload = () => {
