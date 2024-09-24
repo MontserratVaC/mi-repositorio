@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Pago.css';
@@ -41,6 +41,42 @@ function Pago() {
     }
   };
 
+  useEffect(() => {
+    // Script de PayPal
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=AcKp0WMNoFxG2YdrbCmmYJPdc7_EZzgmON74FZXGpdxneI7U1JvHfFRifS8lsIvWj3_JekMus5jndS-9&currency=USD`;
+    script.async = true;
+
+    script.onload = () => {
+      window.paypal.Buttons({
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: totalPrice.toString() // total a pagar
+              }
+            }]
+          });
+        },
+        onApprove: (data, actions) => {
+          return actions.order.capture().then((details) => {
+            alert(`Transacción completada por ${details.payer.name.given_name}`);
+            // Editar para como guardar en tu backend.
+          });
+        },
+        onError: (err) => {
+          console.error("Error en la transacción de PayPal:", err);
+        }
+      }).render('#paypal-button-container');
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script); // Limpia el script
+    };
+  }, [totalPrice]);
+
   return (
     <div className="summary-container">
       <div className="summary-box">
@@ -64,7 +100,12 @@ function Pago() {
           <span>Total:</span>
           <span>${totalPrice}</span>
         </div>
+
+        {/* Botón para recoger en tienda (Generar factura en PDF) */}
         <button onClick={handleGenerateInvoice} className="pickup-button">Recoger en tienda</button>
+
+        {/* Contenedor del botón de PayPal */}
+        <div id="paypal-button-container"></div>
       </div>
     </div>
   );
