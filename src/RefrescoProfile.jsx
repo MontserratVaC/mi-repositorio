@@ -1,3 +1,4 @@
+//Librerías para pedir peticiones http, actualizaciones, aplicar estilos
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './RefrescoProfile.css';

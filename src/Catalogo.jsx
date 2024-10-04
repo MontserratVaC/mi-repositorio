@@ -1,3 +1,4 @@
+//importaciones
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +8,7 @@ function Catalogo() {
   const [catalogData, setCatalogData] = useState([]);
   const [quantities, setQuantities] = useState({});
   const navigate = useNavigate();
-
+//se cargan los datos
   useEffect(() => {
     axios.get('http://localhost/catalog.php')
       .then(response => {
@@ -37,14 +38,14 @@ function Catalogo() {
       }
     });
   }, []);
-
+//manejo de cantidades para un producto
   const handleQuantityChange = (id, change) => {
     setQuantities(prevQuantities => ({
       ...prevQuantities,
       [id]: Math.max(0, (prevQuantities[id] || 0) + change) 
     }));
   };
-
+//manejo de compra
   const handleBuyClick = () => {
     const selectedProducts = catalogData.filter(product => quantities[product.id] > 0).map(product => ({
       ...product,
@@ -56,7 +57,7 @@ function Catalogo() {
 
     navigate('/pago', { state: { selectedProducts, totalAmount } });
   };
-
+//reenderizado del componente 
   return (
     <div className="catalog-container">
       <h1>CATÁLOGO</h1>

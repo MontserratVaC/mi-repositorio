@@ -1,3 +1,4 @@
+//librerías para pedir peticiones http, actualizaciones, aplicar estilos
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AlcoholProfile.css';
@@ -25,7 +26,7 @@ const AlcoholProfile = () => {
     precio: '',
     image_url: ''
   });
-
+//carga los datos del servidor 
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,7 +38,7 @@ const AlcoholProfile = () => {
     };
     fetchData();
   }, []);
-
+//actualiza los datos 
   const mostrarModalActualizar = (dato) => {
     setForm(dato);
     setModalActualizar(true);
@@ -60,7 +61,7 @@ const AlcoholProfile = () => {
   const cerrarModalInsertar = () => {
     setModalInsertar(false);
   };
-
+//envía los datos del formulario a un servidor para actualizar un elemento
   const editar = () => {
     axios.post('http://localhost/alcohol_update.php', form)
       .then(response => {
@@ -76,7 +77,7 @@ const AlcoholProfile = () => {
         alert('Error al actualizar');
       });
   };
-
+//elimina elementos de la lista
   const eliminar = (id) => {
     const opcion = window.confirm('Estás seguro que deseas eliminar el elemento ' + id);
     if (opcion) {
@@ -94,7 +95,7 @@ const AlcoholProfile = () => {
         });
     }
   };
-
+//agrega un nuevo elemento a la lista
   const insertar = () => {
     if (form.nombre && form.precio && form.image_url) {
       axios.post('http://localhost/alcohol_create.php', form)
@@ -113,14 +114,14 @@ const AlcoholProfile = () => {
       alert('Por favor, complete todos los campos');
     }
   };
-
+//actualiza el estado
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value
     });
   };
-
+//genera un archivo pdf
   const generatePDF = () => {
     axios.post('http://localhost/generar_pdf_alcohol.php', { data: dataState }, { responseType: 'blob' })
       .then(response => {
@@ -129,7 +130,7 @@ const AlcoholProfile = () => {
       })
       .catch(error => console.error('Error al generar el PDF:', error));
   };
-
+//crea una tabla con todos los elementos 
   return (
     <>
       <Container>

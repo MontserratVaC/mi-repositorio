@@ -1,3 +1,4 @@
+//librerías, navegación y funcionalidad entre el sitio
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import './App.css';
@@ -20,7 +21,7 @@ import Pago from './Pago';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-
+//verificar si hay un usuario almacenado en localStorage
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) {
@@ -30,6 +31,7 @@ function App() {
   }, []);
 
   return (
+    //permite el enrutamiento entre diferentes páginas
     <Router>
       <div className="app-container">
         <Menu isLoggedIn={isLoggedIn} isAdmin={isAdmin} setIsLoggedIn={setIsLoggedIn} setIsAdmin={setIsAdmin} />
@@ -59,7 +61,7 @@ function App() {
     </Router>
   );
 }
-
+//proporciona enlaces para acceder a diferentes secciones de la aplicación
 function Home() {
   return (
     <div>
@@ -87,7 +89,7 @@ function Home() {
     </div>
   );
 }
-
+//manejar la navegación
 function Menu({ isLoggedIn, isAdmin, setIsLoggedIn, setIsAdmin }) {
   const [showMenu, setShowMenu] = useState(false);
   const location = useLocation();

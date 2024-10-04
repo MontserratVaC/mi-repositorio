@@ -1,3 +1,4 @@
+///librerías para pedir peticiones http, actualizaciones, aplicar estilos
 import React, { useState, useEffect } from 'react';
 import './PerfilUsuario.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -7,7 +8,7 @@ const PerfilUsuario = () => {
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const user = JSON.parse(localStorage.getItem('user'));
-
+//Efecto para Cargar Imágenes
   useEffect(() => {
     if (user.imagen_fondo) {
       setBackgroundImage(`http://localhost/${user.imagen_fondo}`);
@@ -16,7 +17,7 @@ const PerfilUsuario = () => {
       setProfileImage(`http://localhost/${user.imagen_perfil}`);
     }
   }, [user]);
-
+//Manejo de Cambio de Imagen de Fondo
   const handleBackgroundChange = (e) => {
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
@@ -35,7 +36,7 @@ const PerfilUsuario = () => {
         console.error('Error al cargar la imagen:', error);
       });
   };
-
+//Manejo de Cambio de Imagen de Perfil
   const handleProfileChange = (e) => {
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
@@ -54,6 +55,7 @@ const PerfilUsuario = () => {
         console.error('Error al cargar la imagen:', error);
       });
   };
+//Renderizado del Componente
 
   return (
     <div className="profile-container">

@@ -1,3 +1,4 @@
+//librerías para pedir peticiones http, actualizaciones, aplicar estilos
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminProfile.css';
@@ -26,7 +27,7 @@ const AdminProfile = () => {
     ingredientes: '',
     image_url: ''
   });
-
+//recupera datos de un servidor cuando el componente se carga y los guarda en el estado.
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,7 +63,7 @@ const AdminProfile = () => {
   const cerrarModalInsertar = () => {
     setModalInsertar(false);
   };
-
+//actualiza el estado local si la operación es exitosa y maneja posibles errores.
   const editar = () => {
     console.log("Datos para actualizar:", form);
     axios.post('http://localhost/update.php', form)
@@ -83,6 +84,7 @@ const AdminProfile = () => {
       });
   };
 
+  //Elimina elementos 
   const eliminar = (id) => {
     console.log("ID para eliminar:", id); 
     const opcion = window.confirm('Estás seguro que deseas eliminar el elemento ' + id);
@@ -104,7 +106,7 @@ const AdminProfile = () => {
         });
     }
   };
-
+// Inserta elementos
   const insertar = () => {
     console.log("Datos del formulario:", form); 
     if (form.nombre && form.precio && form.ingredientes && form.image_url) {
@@ -135,7 +137,7 @@ const AdminProfile = () => {
       [e.target.name]: e.target.value
     });
   };
-
+//Genera el pdf del crud admin
   const generatePDF = () => {
     axios.post('http://localhost/generar_pdf.php', { data: dataState }, { responseType: 'blob' })
       .then(response => {
@@ -144,7 +146,7 @@ const AdminProfile = () => {
       })
       .catch(error => console.error('Error al generar el PDF:', error));
   };
-
+// Se crea una tabla en dónde se visualiza el CRUD
   return (
     <>
       <Container>

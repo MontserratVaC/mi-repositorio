@@ -1,3 +1,4 @@
+///librerías para pedir peticiones http, actualizaciones, aplicar estilos
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -8,7 +9,7 @@ const Login = ({ setIsLoggedIn, setIsAdmin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
+//Manejo del Envío del Formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -29,7 +30,7 @@ const Login = ({ setIsLoggedIn, setIsAdmin }) => {
       setError('Error al iniciar sesión');
     }
   };
-
+//Renderizado del Componente
   return (
     <div className="login-container">
       <img src="src/img/logo2.png" alt="Logo" className="login-logo" />

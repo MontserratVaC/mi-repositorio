@@ -1,3 +1,4 @@
+//Librerías para pedir peticiones http, actualizaciones, aplicar estilos
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,7 +13,7 @@ const Registro = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
+//Manejo del Envío del Formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
