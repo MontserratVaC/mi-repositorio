@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
+import { LoginButton } from './autenticacion'; // Importar LoginButton
 
 const Login = ({ setIsLoggedIn, setIsAdmin }) => {
   const [email, setEmail] = useState('');
@@ -15,10 +16,21 @@ const Login = ({ setIsLoggedIn, setIsAdmin }) => {
     try {
       const response = await axios.post('http://localhost/login.php', { email, password });
       if (response.data.success) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        // Guardar datos del usuario en localStorage
+        const userData = {
+          email: response.data.user.email,
+          name: response.data.user.name || 'Nombre por defecto', // Asegúrate de que esto venga de tu respuesta
+          picture: response.data.user.picture || 'url_imagen_por_defecto', // Asegúrate de que esto venga de tu respuesta
+        };
+
+        localStorage.setItem('user', JSON.stringify(userData));
         setIsLoggedIn(true);
-        setIsAdmin(response.data.user.email === 'administrador@gmail.com');
-        if (response.data.user.email === 'administrador@gmail.com') {
+        setIsAdmin(userData.email === 'administrador@gmail.com');
+
+        // Enviar datos a registro.php para guardarlos en la base de datos
+        await axios.post('http://localhost/registro.php', userData);
+
+        if (userData.email === 'administrador@gmail.com') {
           navigate('/admin-profile');
         } else {
           navigate('/');
@@ -59,6 +71,10 @@ const Login = ({ setIsLoggedIn, setIsAdmin }) => {
         {error && <p className="error">{error}</p>}
         <button type="submit" className="login-button">Iniciar Sesión</button>
       </form>
+      <br />
+      <p>------------------------------------ ór ------------------------------------</p>
+      
+      <LoginButton  /> 
       <p>
         ¿No tienes una cuenta? <a href="/Registro">Regístrate aquí</a>
       </p>
