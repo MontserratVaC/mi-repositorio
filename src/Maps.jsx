@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 function Maps() {
   useEffect(() => {
-    // Comprobar si la API ya está cargada
+    // Aqui comprobamos si la API ya está cargada
     if (!window.google) {
       const loadScript = (src) => {
         return new Promise((resolve, reject) => {
@@ -17,11 +17,11 @@ function Maps() {
 
       loadScript(`https://maps.googleapis.com/maps/api/js?key=AIzaSyBjELQaL6gIzd8hiA3pWcRxY0ow68MKZB0&libraries=places`)
         .then(() => {
-          initMap(); // Llamar a initMap directamente
+          initMap(); // Llamamos a initMap directamente
         })
         .catch((error) => console.error("Error loading Google Maps script", error));
     } else {
-      initMap(); // Si ya está cargado, simplemente llama a initMap
+      initMap(); // Si ya está cargado, llamamos a initMap
     }
 
     const initMap = () => {
