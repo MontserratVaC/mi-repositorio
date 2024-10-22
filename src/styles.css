@@ -1,0 +1,20 @@
+.loginButton {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .loginButton img {
+    margin-right: 15px;
+    width: 20px;
+    height: 20px;
+  }
+  
