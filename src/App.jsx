@@ -16,6 +16,7 @@ import Extras from './Extras';
 import Registro from './Registro';
 import PerfilUsuario from './PerfilUsuario';
 import Pago from './Pago';
+import Maps from './Maps';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -50,6 +51,7 @@ function App() {
             <Route path="/Registro" element={<Registro />} />
             <Route path="/PerfilUsuario" element={<PerfilUsuario />} />
             <Route path="/Pago" element={<Pago />} />
+            <Route path="/Maps" element={<Maps />} />
           </Routes>
         </main>
         <footer>
@@ -141,6 +143,8 @@ function Menu({ isLoggedIn, isAdmin, setIsLoggedIn, setIsAdmin }) {
               <Link to="/extras-profile">Extras</Link>
             </>
           )}
+          {/* Nueva ruta para el mapa */}
+          <Link to="/maps">Ver Mapa</Link>
         </div>
       </div>
     </div>
