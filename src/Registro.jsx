@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Registro.css';
+import { LoginButton } from './autenticacion';
 
 const Registro = () => {
   const [nombre, setNombre] = useState('');
@@ -27,7 +28,6 @@ const Registro = () => {
         telefono,
         email,
         password,
-        
       });
 
       if (response.data.success) {
@@ -105,8 +105,12 @@ const Registro = () => {
           />
         </div>
         {error && <p className="error">{error}</p>}
-        <button type="submit" className="registro-button">Registrarse</button>
-      </form>
+        <button type="submit" className="registro-button">Registrarse</button> 
+
+      </form><br />
+      <p>------------------------------------ ór ------------------------------------</p>
+      
+      <LoginButton  /> 
       <p>
         ¿Ya tienes una cuenta? <a href="/login">Inicia sesión aquí</a>
       </p>
