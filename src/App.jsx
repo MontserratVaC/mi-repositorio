@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { LoginButton }from './autenticacion';
+import { LogoutButton }from './Logout';
+import { Profile } from './Profile';
 import './App.css';
 
 import Catalogo from './Catalogo';
@@ -32,6 +36,7 @@ function App() {
   return (
     <Router>
       <div className="app-container">
+      
         <Menu isLoggedIn={isLoggedIn} isAdmin={isAdmin} setIsLoggedIn={setIsLoggedIn} setIsAdmin={setIsAdmin} />
         <main className="content-container">
           <Routes>
@@ -55,16 +60,27 @@ function App() {
         <footer>
           <p>&copy; 2024 Innovation World</p>
         </footer>
+        
       </div>
     </Router>
   );
 }
 
 function Home() {
+  const { isAuthenticated } = useAuth0(); // Obtener el estado de autenticación
   return (
     <div>
       <header>
         <h1>Bienvenido a BoozeBot</h1>
+        {isAuthenticated ? (
+          <>
+            <Profile />
+            <LogoutButton />
+          </>
+        ) : (
+          
+          <p></p>
+        )}
       </header>
       <div className="section-container">
         <section className="container custom-container">
@@ -131,6 +147,7 @@ function Menu({ isLoggedIn, isAdmin, setIsLoggedIn, setIsAdmin }) {
           {!isLoggedIn && <Link to="/Login">Iniciar Sesión</Link>}
           {!isLoggedIn && <Link to="/Registro">Regístrate</Link>}
           <Link to="/">Ir a inicio</Link>
+          
           {isLoggedIn && <Link to="/PerfilUsuario">Perfil</Link>}
           {isLoggedIn && <a href="#" onClick={handleLogout}>Cerrar Sesión</a>}
           {isAdmin && (
